@@ -27,6 +27,7 @@ class InterceptionFilters():
         self._extender.savedHeaders = [{"title": "Temporary headers", "headers": "Cookie: Insert=injected; cookie=or;\nHeader: here"}]
         # IFStrings has to contains : character
         IFStrings = ["Scope items only: (Content is not required)", 
+                     "Ignore duplicates: (Content is not required)",
                      "URL Contains (simple string): ",
                      "URL Contains (regex): ",
                      "URL Not Contains (simple string): ",

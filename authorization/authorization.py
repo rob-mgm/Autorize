@@ -3,6 +3,7 @@
 
 from operator import truediv
 import sys
+from typing import Any
 reload(sys)
 
 if (sys.version_info[0] == 2):
@@ -15,6 +16,8 @@ from gui.table import LogEntry, UpdateTableEDT
 from javax.swing import SwingUtilities
 from java.net import URL
 import re
+
+UNIQUE_URLS = []
 
 def tool_needs_to_be_ignored(self, toolFlag):
     for i in range(0, self.IFList.getModel().getSize()):
@@ -71,6 +74,7 @@ def no_filters_defined(self):
 
 def message_passed_interception_filters(self, messageInfo):
     urlString = str(self._helpers.analyzeRequest(messageInfo).getUrl())
+    methodString = str(self._helpers.analyzeRequest(messageInfo).getMethod())
     reqInfo = self._helpers.analyzeRequest(messageInfo)
     reqBodyBytes = messageInfo.getRequest()[reqInfo.getBodyOffset():]
     bodyStr = self._helpers.bytesToString(reqBodyBytes)
@@ -86,6 +90,13 @@ def message_passed_interception_filters(self, messageInfo):
         if interceptionFilterTitle == "Scope items only":
             currentURL = URL(urlString)
             if not self._callbacks.isInScope(currentURL):
+                message_passed_filters = False
+
+        if interceptionFilterTitle == "Ignore duplicates":
+            currentReq = (methodString, urlString)
+            if currentReq not in UNIQUE_URLS:
+                UNIQUE_URLS.append(currentReq)
+            else:
                 message_passed_filters = False
 
         if interceptionFilterTitle == "URL Contains (simple string)":
@@ -155,20 +166,17 @@ def message_passed_interception_filters(self, messageInfo):
         if interceptionFilterTitle == "Only HTTP methods (newline separated)":
             filterMethods = interceptionFilter[39:].split("\n")
             filterMethods = [x.lower() for x in filterMethods]
-            reqMethod = str(self._helpers.analyzeRequest(messageInfo).getMethod())
-            if reqMethod.lower() not in filterMethods:
+            if methodString.lower() not in filterMethods:
                 message_passed_filters = False
 
         if interceptionFilterTitle == "Ignore HTTP methods (newline separated)":
             filterMethods = interceptionFilter[41:].split("\n")
             filterMethods = [x.lower() for x in filterMethods]
-            reqMethod = str(self._helpers.analyzeRequest(messageInfo).getMethod())
-            if reqMethod.lower() in filterMethods:
+            if methodString.lower() in filterMethods:
                 message_passed_filters = False
 
         if interceptionFilterTitle == "Ignore OPTIONS requests":
-            reqMethod = str(self._helpers.analyzeRequest(messageInfo).getMethod())
-            if reqMethod == "OPTIONS":
+            if methodString == "OPTIONS":
                 message_passed_filters = False
 
     return message_passed_filters

@@ -12,7 +12,7 @@ class BurpExtender(IBurpExtender, IHttpListener, IProxyListener):
         self._callbacks = callbacks
         self._helpers = callbacks.getHelpers()
         
-        callbacks.setExtensionName("Autorize")
+        callbacks.setExtensionName("Autorize++")
         
         initiator = Initiator(self)
 
